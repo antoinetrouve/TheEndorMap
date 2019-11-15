@@ -24,6 +24,7 @@ private const val REQUEST_CHECK_SETTINGS = 1
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var locationLiveData: LocationLiveData
     private lateinit var map: GoogleMap
+    private var firstLocation: Boolean = true
 
     private val viewModel: MapViewModel by lazy {
         ViewModelProviders.of(this)[MapViewModel::class.java]
@@ -53,6 +54,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun updateUiState(state: MapUiState) {
+        Timber.w("state= ${state::class.java.simpleName}")
         when (state) {
             MapUiState.Loading -> { }
             is MapUiState.Error -> { }
@@ -88,8 +90,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun handleLocationData(locationData: LocationData) {
         if (handleLocationException(locationData.exception)) return
-
-//        Timber.i("last location from LIVE DATA ${locationData.location}")
+        locationData.location?.let {
+            if (firstLocation) {
+                firstLocation = false
+                viewModel.loadPois(it.latitude, it.longitude)
+            }
+        }
     }
 
     private fun handleLocationException(exception: Exception?): Boolean {
