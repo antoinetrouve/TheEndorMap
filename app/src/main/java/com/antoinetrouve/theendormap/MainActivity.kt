@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMapOptions
@@ -22,6 +24,10 @@ private const val REQUEST_CHECK_SETTINGS = 1
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var locationLiveData: LocationLiveData
     private lateinit var map: GoogleMap
+
+    private val viewModel: MapViewModel by lazy {
+        ViewModelProviders.of(this)[MapViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +47,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         locationLiveData = LocationLiveData(this).apply {
             observe(this@MainActivity, Observer { handleLocationData(it!!) })
+        }
+
+        viewModel.getUiState().observe(this, Observer { updateUiState(it!!) })
+    }
+
+    private fun updateUiState(state: MapUiState) {
+        when (state) {
+            MapUiState.Loading -> { }
+            is MapUiState.Error -> { }
+            is MapUiState.PoiReady -> { }
         }
     }
 

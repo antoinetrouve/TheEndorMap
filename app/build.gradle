@@ -6,6 +6,7 @@ apply plugin: 'kotlin-android-extensions'
 
 def timber_version = "4.7.1"
 def location_version = "17.0.0"
+def lifecycle_version = "2.1.0"
 
 static def getApiKey(){
     Properties props = new Properties()
@@ -50,6 +51,9 @@ dependencies {
     // Google services location
     implementation "com.google.android.gms:play-services-location:$location_version"
     implementation "com.google.android.gms:play-services-maps:$location_version"
+
+    // ViewModel and LiveData
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
 
     // region test
     testImplementation 'junit:junit:4.12'
