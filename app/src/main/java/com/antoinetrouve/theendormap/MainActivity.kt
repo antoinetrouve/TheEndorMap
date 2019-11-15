@@ -13,6 +13,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.MapStyleOptions
 import timber.log.Timber
 
 private const val REQUEST_PERMISSION_LOCATION_START_UPDATE = 2
@@ -65,6 +66,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        // Add a map style (generated with https://mapstyle.withgoogle.com/)
+        map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.maps_style))
     }
 
     private fun handleLocationData(locationData: LocationData) {
