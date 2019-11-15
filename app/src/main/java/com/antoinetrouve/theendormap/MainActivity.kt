@@ -9,19 +9,34 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.*
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMapOptions
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import timber.log.Timber
 
 private const val REQUEST_PERMISSION_LOCATION_START_UPDATE = 2
 private const val REQUEST_CHECK_SETTINGS = 1
 
-class MainActivity : AppCompatActivity() {
-
-   private lateinit var locationLiveData: LocationLiveData
+class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+    private lateinit var locationLiveData: LocationLiveData
+    private lateinit var map: GoogleMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Create map options
+        val mapOptions = GoogleMapOptions()
+            .mapType(GoogleMap.MAP_TYPE_NORMAL)
+            .zoomControlsEnabled(true)
+            .zoomGesturesEnabled(true)
+
+        // Create the map fragment
+        val mapFragment = SupportMapFragment.newInstance(mapOptions)
+        mapFragment.getMapAsync(this)
+
+        supportFragmentManager.beginTransaction().replace(R.id.content, mapFragment).commit()
 
         locationLiveData = LocationLiveData(this).apply {
             observe(this@MainActivity, Observer { handleLocationData(it!!) })
@@ -48,10 +63,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onMapReady(googleMap: GoogleMap) {
+        map = googleMap
+    }
+
     private fun handleLocationData(locationData: LocationData) {
         if (handleLocationException(locationData.exception)) return
 
-        Timber.i("last location from LIVE DATA ${locationData.location}")
+//        Timber.i("last location from LIVE DATA ${locationData.location}")
     }
 
     private fun handleLocationException(exception: Exception?): Boolean {

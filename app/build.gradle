@@ -7,6 +7,12 @@ apply plugin: 'kotlin-android-extensions'
 def timber_version = "4.7.1"
 def location_version = "17.0.0"
 
+static def getApiKey(){
+    Properties props = new Properties()
+    props.load(new FileInputStream(new File('secrets.properties')))
+    return props['GOOGLE_MAPS_API_KEY']
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.1"
@@ -17,8 +23,13 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [ GOOGLE_MAPS_API_KEY:getApiKey()]
     }
     buildTypes {
+        // usage: BuildConfig.GOOGLE_MAPS_API_KEY
+        applicationVariants.all { variant ->
+            variant.buildConfigField "String", "GOOGLE_MAPS_API_KEY", "\""+getApiKey()+"\""
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -38,6 +49,7 @@ dependencies {
 
     // Google services location
     implementation "com.google.android.gms:play-services-location:$location_version"
+    implementation "com.google.android.gms:play-services-maps:$location_version"
 
     // region test
     testImplementation 'junit:junit:4.12'
