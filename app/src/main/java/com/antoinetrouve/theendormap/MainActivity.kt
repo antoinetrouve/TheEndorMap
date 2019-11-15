@@ -17,25 +17,11 @@ private const val REQUEST_CHECK_SETTINGS = 1
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationRequest: LocationRequest
-
-    private val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult?) {
-            locationResult ?: return
-            locationResult.locations.forEach { location ->
-                Timber.d("location update $location")
-            }
-        }
-    }
-
-    private lateinit var locationLiveData: LocationLiveData
+   private lateinit var locationLiveData: LocationLiveData
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        // get location client
-//        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         locationLiveData = LocationLiveData(this).apply {
             observe(this@MainActivity, Observer { handleLocationData(it!!) })
@@ -51,14 +37,14 @@ class MainActivity : AppCompatActivity() {
         if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) return
 
         when (requestCode) {
-            REQUEST_PERMISSION_LOCATION_START_UPDATE -> startLocationUpdate()
+            REQUEST_PERMISSION_LOCATION_START_UPDATE -> locationLiveData.startRequestLocation()
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
-            REQUEST_CHECK_SETTINGS -> startLocationUpdate()
+            REQUEST_CHECK_SETTINGS -> locationLiveData.startRequestLocation()
         }
     }
 
@@ -75,46 +61,11 @@ class MainActivity : AppCompatActivity() {
             is SecurityException -> {
                 checkLocationPermission(REQUEST_PERMISSION_LOCATION_START_UPDATE)
             }
-        }
-        return true
-    }
-
-    private fun startLocationUpdate() {
-        Timber.i("Start location update")
-        if (!checkLocationPermission(REQUEST_PERMISSION_LOCATION_START_UPDATE)) return
-
-        // request location updates
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-    }
-
-    /**
-     * Config and Build location request.
-     */
-    private fun createLocationRequest() {
-        locationRequest = LocationRequest.create().apply {
-            interval = 10000
-            fastestInterval = 5000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-        val task = LocationServices.getSettingsClient(this).run {
-            checkLocationSettings(builder.build())
-        }
-//        val client = LocationServices.getSettingsClient(this)
-//        val task = client.checkLocationSettings(builder.build())
-
-        task.addOnSuccessListener { locationSettingsResponse ->
-            Timber.i("Location settings satisfied. Init location request here")
-            startLocationUpdate()
-        }
-
-        task.addOnFailureListener { exception ->
-            Timber.e(exception, "Failed to modify location settings")
-            if (exception is ResolvableApiException) {
+            is ResolvableApiException -> {
                 exception.startResolutionForResult(this, REQUEST_CHECK_SETTINGS)
             }
         }
+        return true
     }
 
     /**
