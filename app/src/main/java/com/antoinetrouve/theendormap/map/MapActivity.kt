@@ -119,13 +119,18 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun handleLocationData(locationData: LocationData) {
         if (handleLocationException(locationData.exception)) return
         locationData.location?.let {
+            val latLng = LatLng(it.latitude, it.longitude)
+
             if (firstLocation && ::map.isInitialized) {
                 // center camera on user's position
-                val latLng = LatLng(it.latitude, it.longitude)
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 9f))
 
                 firstLocation = false
                 viewModel.loadPois(it.latitude, it.longitude)
+            }
+
+            if (::userMarker.isInitialized) {
+                userMarker.position = latLng
             }
         }
     }
