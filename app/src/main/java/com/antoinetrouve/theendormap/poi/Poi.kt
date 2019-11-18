@@ -1,4 +1,4 @@
-package com.antoinetrouve.theendormap
+package com.antoinetrouve.theendormap.poi
 
 /**
  * iconId and iconColor ar mutually exclusive

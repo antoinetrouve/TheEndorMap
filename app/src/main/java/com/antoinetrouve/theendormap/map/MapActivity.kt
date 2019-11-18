@@ -1,27 +1,29 @@
-package com.antoinetrouve.theendormap
+package com.antoinetrouve.theendormap.map
 
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import com.antoinetrouve.theendormap.R
+import com.antoinetrouve.theendormap.location.LocationData
+import com.antoinetrouve.theendormap.location.LocationLiveData
 import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.GoogleMapOptions
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
+import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 
 private const val REQUEST_PERMISSION_LOCATION_START_UPDATE = 2
 private const val REQUEST_CHECK_SETTINGS = 1
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var locationLiveData: LocationLiveData
     private lateinit var map: GoogleMap
     private var firstLocation: Boolean = true
@@ -47,7 +49,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         supportFragmentManager.beginTransaction().replace(R.id.content, mapFragment).commit()
 
         locationLiveData = LocationLiveData(this).apply {
-            observe(this@MainActivity, Observer { handleLocationData(it!!) })
+            observe(this@MapActivity, Observer { handleLocationData(it!!) })
         }
 
         viewModel.getUiState().observe(this, Observer { updateUiState(it!!) })
@@ -56,9 +58,26 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun updateUiState(state: MapUiState) {
         Timber.w("state= ${state::class.java.simpleName}")
         when (state) {
-            MapUiState.Loading -> { }
-            is MapUiState.Error -> { }
-            is MapUiState.PoiReady -> { }
+            MapUiState.Loading -> {
+                loadingProgressBar.show()
+            }
+            is MapUiState.Error -> {
+                loadingProgressBar.hide()
+                Toast.makeText(
+                    this,
+                    "error : ${state.errorMessage}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            is MapUiState.PoiReady -> {
+                loadingProgressBar.hide()
+                state.userPoi?.let {
+
+                }
+                state.pois?.let {
+
+                }
+            }
         }
     }
 
@@ -85,13 +104,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         // Add a map style (generated with https://mapstyle.withgoogle.com/)
-        map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.maps_style))
+        map.setMapStyle(
+            MapStyleOptions.loadRawResourceStyle(
+                this,
+                R.raw.maps_style
+            )
+        )
     }
 
     private fun handleLocationData(locationData: LocationData) {
         if (handleLocationException(locationData.exception)) return
         locationData.location?.let {
-            if (firstLocation) {
+            if (firstLocation && ::map.isInitialized) {
+                // center camera on user's position
+                val latLng = LatLng(it.latitude, it.longitude)
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 9f))
+
                 firstLocation = false
                 viewModel.loadPois(it.latitude, it.longitude)
             }
@@ -106,7 +134,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 checkLocationPermission(REQUEST_PERMISSION_LOCATION_START_UPDATE)
             }
             is ResolvableApiException -> {
-                exception.startResolutionForResult(this, REQUEST_CHECK_SETTINGS)
+                exception.startResolutionForResult(
+                    this,
+                    REQUEST_CHECK_SETTINGS
+                )
             }
         }
         return true

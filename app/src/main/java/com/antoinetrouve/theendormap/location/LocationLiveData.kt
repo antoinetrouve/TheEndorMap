@@ -1,13 +1,9 @@
-package com.antoinetrouve.theendormap
+package com.antoinetrouve.theendormap.location
 
 import android.content.Context
-import android.location.Location
 import androidx.lifecycle.LiveData
 import com.google.android.gms.location.*
 import timber.log.Timber
-import kotlin.Exception
-
-data class LocationData(val location: Location? = null, val exception: Exception? = null)
 
 class LocationLiveData(context: Context) : LiveData<LocationData>() {
 
@@ -65,7 +61,7 @@ class LocationLiveData(context: Context) : LiveData<LocationData>() {
             checkLocationSettings(builder.build())
         }
 
-        task.addOnSuccessListener { locationSettingsResponse ->
+        task.addOnSuccessListener {
             Timber.i("Location settings satisfied. Init location request here")
             requestLocation()
         }

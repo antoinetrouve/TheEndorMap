@@ -1,8 +1,11 @@
-package com.antoinetrouve.theendormap
+package com.antoinetrouve.theendormap.map
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.antoinetrouve.theendormap.poi.Poi
+import com.antoinetrouve.theendormap.poi.generatePois
+import com.antoinetrouve.theendormap.poi.generateUserPoi
 import timber.log.Timber
 
 sealed class MapUiState {

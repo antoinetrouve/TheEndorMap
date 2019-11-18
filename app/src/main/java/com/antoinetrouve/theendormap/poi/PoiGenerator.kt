@@ -1,6 +1,7 @@
-package com.antoinetrouve.theendormap
+package com.antoinetrouve.theendormap.poi
 
 import android.graphics.Color
+import com.antoinetrouve.theendormap.R
 
 const val GREY_HAVENS = "Grey Havens"
 const val HOBBITON = "Hobbiton"
@@ -20,10 +21,16 @@ private data class Loc(val deltaX: Double,
                        val deltaY: Double)
 
 private val locations = mapOf(
-    GREY_HAVENS to Loc(-13.1, 4.5),
+    GREY_HAVENS to Loc(
+        -13.1,
+        4.5
+    ),
     HOBBITON to Loc(-10.8, 4.5),
     ISENGARD to Loc(-5.8, 1.5),
-    MORIA_GATES to Loc(-5.1, 4.5),
+    MORIA_GATES to Loc(
+        -5.1,
+        4.5
+    ),
     LORIEN to Loc(-3.6, 4.0),
     GONDOR to Loc(-0.5, -1.8),
     MOUNT_DOOM to Loc(1.5, -1.0)
@@ -52,8 +59,14 @@ fun generatePois(latitude: Double, longitude: Double) : List<Poi> {
     return listOf(
         Poi(
             title = GREY_HAVENS,
-            latitude = distToLat(GREY_HAVENS, latitude),
-            longitude = distToLong(GREY_HAVENS, longitude),
+            latitude = distToLat(
+                GREY_HAVENS,
+                latitude
+            ),
+            longitude = distToLong(
+                GREY_HAVENS,
+                longitude
+            ),
             imageId = R.drawable.greyhavens,
             iconColor = Color.BLUE,
             detailUrl = "http://lotr.wikia.com/wiki/Grey_Havens",
@@ -66,8 +79,14 @@ fun generatePois(latitude: Double, longitude: Double) : List<Poi> {
         ),
         Poi(
             title = HOBBITON,
-            latitude = distToLat(HOBBITON, latitude),
-            longitude = distToLong(HOBBITON, longitude),
+            latitude = distToLat(
+                HOBBITON,
+                latitude
+            ),
+            longitude = distToLong(
+                HOBBITON,
+                longitude
+            ),
             imageId = R.drawable.hobbiton,
             iconColor = Color.GREEN,
             detailUrl = "http://lotr.wikia.com/wiki/Hobbiton",
@@ -79,8 +98,14 @@ fun generatePois(latitude: Double, longitude: Double) : List<Poi> {
         ),
         Poi(
             title = ISENGARD,
-            latitude = distToLat(ISENGARD, latitude),
-            longitude = distToLong(ISENGARD, longitude),
+            latitude = distToLat(
+                ISENGARD,
+                latitude
+            ),
+            longitude = distToLong(
+                ISENGARD,
+                longitude
+            ),
             imageId = R.drawable.isengard,
             iconColor = Color.RED,
             detailUrl = "http://lotr.wikia.com/wiki/Isengard",
@@ -92,7 +117,10 @@ fun generatePois(latitude: Double, longitude: Double) : List<Poi> {
         ),
         Poi(
             title = MORIA_GATES,
-            latitude = distToLat(MORIA_GATES, latitude),
+            latitude = distToLat(
+                MORIA_GATES,
+                latitude
+            ),
             longitude = distToLong(
                 MORIA_GATES,
                 longitude
@@ -107,8 +135,14 @@ fun generatePois(latitude: Double, longitude: Double) : List<Poi> {
         ),
         Poi(
             title = LORIEN,
-            latitude = distToLat(LORIEN, latitude),
-            longitude = distToLong(LORIEN, longitude),
+            latitude = distToLat(
+                LORIEN,
+                latitude
+            ),
+            longitude = distToLong(
+                LORIEN,
+                longitude
+            ),
             imageId = R.drawable.lorien,
             iconColor = Color.GREEN,
             detailUrl = "http://lotr.wikia.com/wiki/Lothl%C3%B3rien",
@@ -121,8 +155,14 @@ fun generatePois(latitude: Double, longitude: Double) : List<Poi> {
         ),
         Poi(
             title = GONDOR,
-            latitude = distToLat(GONDOR, latitude),
-            longitude = distToLong(GONDOR, longitude),
+            latitude = distToLat(
+                GONDOR,
+                latitude
+            ),
+            longitude = distToLong(
+                GONDOR,
+                longitude
+            ),
             imageId = R.drawable.gondor,
             iconColor = Color.BLUE,
             detailUrl = "http://lotr.wikia.com/wiki/Gondor",
@@ -134,7 +174,10 @@ fun generatePois(latitude: Double, longitude: Double) : List<Poi> {
         ),
         Poi(
             title = MOUNT_DOOM,
-            latitude = distToLat(MOUNT_DOOM, latitude),
+            latitude = distToLat(
+                MOUNT_DOOM,
+                latitude
+            ),
             longitude = distToLong(
                 MOUNT_DOOM,
                 longitude
