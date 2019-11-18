@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.antoinetrouve.theendormap.R
+import com.antoinetrouve.theendormap.extensions.addPoiToMapMarker
 import com.antoinetrouve.theendormap.location.LocationData
 import com.antoinetrouve.theendormap.location.LocationLiveData
 import com.antoinetrouve.theendormap.poi.Poi

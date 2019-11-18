@@ -1,7 +1,6 @@
 package com.antoinetrouve.theendormap.poi
 
 /**
- * Point of Interest on Map.
  * iconId and iconColor are mutually exclusive
  * If the iconId is defined, iconColor should be left to the default value.
  */
