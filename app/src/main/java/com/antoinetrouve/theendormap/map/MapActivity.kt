@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -79,13 +80,25 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-        // Add a map style (generated with https://mapstyle.withgoogle.com/)
-        map.setMapStyle(
-            MapStyleOptions.loadRawResourceStyle(
-                this,
-                R.raw.maps_style
-            )
-        )
+
+        with(map) {
+            // Add a map style (generated with https://mapstyle.withgoogle.com/)
+            setMapStyle(MapStyleOptions.loadRawResourceStyle(this@MapActivity, R.raw.maps_style))
+            // Custom a map info windows
+            setInfoWindowAdapter(EndorInfoWindowAdapter(this@MapActivity))
+
+            // On info window click event
+            setOnInfoWindowClickListener {
+                showPoiDetail(it.tag as Poi)
+            }
+        }
+    }
+
+    private fun showPoiDetail(poi: Poi) {
+        if (poi.detailUrl.isEmpty()) return
+
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(poi.detailUrl))
+        startActivity(intent)
     }
 
     private fun updateUiState(state: MapUiState) {
