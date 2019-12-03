@@ -16,6 +16,13 @@ class GeofenceManager(context: Context) {
     private val geofencingClient = LocationServices.getGeofencingClient(appContext)
     private val geofences = mutableListOf<Geofence>()
 
+    private val geofencePendingIntent: PendingIntent by lazy {
+        val intent = Intent(appContext, GeofenceIntentService::class.java)
+        PendingIntent.getService(
+            appContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
+    }
+
     /**
      * Configure geofence zone.
      * @param poi The point of Interest attached to geofence event
@@ -45,22 +52,22 @@ class GeofenceManager(context: Context) {
         }
     }
 
+    /**
+     * Delete all geofences from client.
+     */
     fun removeAllGeofences() {
         geofencingClient.removeGeofences(geofencePendingIntent)
         geofences.clear()
     }
 
+    /**
+     * Create geofencing request
+     * @return GeofencingRequest
+     */
     private fun getGeofencingRequest(): GeofencingRequest {
         return GeofencingRequest.Builder()
             .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
             .addGeofences(geofences)
             .build()
-    }
-
-    private val geofencePendingIntent: PendingIntent by lazy {
-        val intent = Intent() // FIXME add missing GeofencingIntentService
-        PendingIntent.getService(
-            appContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-        )
     }
 }
