@@ -15,9 +15,11 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.antoinetrouve.theendormap.R
-import com.antoinetrouve.theendormap.extensions.addPoiToMapMarker
+import com.antoinetrouve.theendormap.geofence.GEOFENCE_ID_MORDOR
+import com.antoinetrouve.theendormap.geofence.GeofenceManager
 import com.antoinetrouve.theendormap.location.LocationData
 import com.antoinetrouve.theendormap.location.LocationLiveData
+import com.antoinetrouve.theendormap.poi.MOUNT_DOOM
 import com.antoinetrouve.theendormap.poi.Poi
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.maps.*
@@ -32,6 +34,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var locationLiveData: LocationLiveData
     private lateinit var userMarker: Marker
     private lateinit var map: GoogleMap
+    private lateinit var geofenceManager: GeofenceManager
     private var firstLocation: Boolean = true
 
     private val viewModel: MapViewModel by lazy {
@@ -53,6 +56,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         supportFragmentManager.beginTransaction().replace(R.id.content, mapFragment).commit()
+        geofenceManager = GeofenceManager(this)
 
         locationLiveData = LocationLiveData(this).apply {
             observe(this@MapActivity, Observer { handleLocationData(it!!) })
@@ -113,6 +117,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun refreshPoisFromCurrentLocation() {
+        // Delete all Geofence task
+        geofenceManager.removeAllGeofences()
+
         // Delete all map
         map.clear()
 
@@ -149,6 +156,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 state.pois?.let { pois ->
                     pois.forEach {
                         addPoiToMapMarker(it, map)
+                        if (it.title == MOUNT_DOOM) {
+                            geofenceManager.createGeofence(it, 20000.0f, GEOFENCE_ID_MORDOR)
+                        }
                     }
                 }
             }
@@ -219,6 +229,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
  * Create a Marker according to Poi given in parameter
  * @param poi source de donnée
  * @param map Google map instance
+ * @return Marker
  */
 private fun addPoiToMapMarker(poi: Poi, map: GoogleMap) : Marker {
     val options = MarkerOptions()

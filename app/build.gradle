@@ -48,7 +48,7 @@ dependencies {
     // Timber
     implementation "com.jakewharton.timber:timber:$timber_version"
 
-    // Google services location
+    // Google services location (included geofence and map services)
     implementation "com.google.android.gms:play-services-location:$location_version"
     implementation "com.google.android.gms:play-services-maps:$location_version"
 
