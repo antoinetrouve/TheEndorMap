@@ -157,7 +157,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     pois.forEach {
                         addPoiToMapMarker(it, map)
                         if (it.title == MOUNT_DOOM) {
-                            geofenceManager.createGeofence(it, 20000.0f, GEOFENCE_ID_MORDOR)
+                            geofenceManager.createGeofence(it, 12000.0f, GEOFENCE_ID_MORDOR)
                         }
                     }
                 }
