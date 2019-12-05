@@ -9,18 +9,20 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import com.antoinetrouve.theendormap.R
 import com.antoinetrouve.theendormap.geofence.GEOFENCE_ID_MORDOR
+import com.antoinetrouve.theendormap.geofence.GEOFENCE_ZONE_RADIUS
 import com.antoinetrouve.theendormap.geofence.GeofenceManager
 import com.antoinetrouve.theendormap.location.LocationData
 import com.antoinetrouve.theendormap.location.LocationLiveData
 import com.antoinetrouve.theendormap.poi.MOUNT_DOOM
 import com.antoinetrouve.theendormap.poi.Poi
+import com.antoinetrouve.theendormap.poi.PoiRepositoryList
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
@@ -37,11 +39,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var geofenceManager: GeofenceManager
     private var firstLocation: Boolean = true
 
-    private val viewModel: MapViewModel by lazy {
-        ViewModelProviders.of(this)[MapViewModel::class.java]
+    private val viewModel by viewModels<MapViewModel> {
+        MapViewModelFactory(PoiRepositoryList())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Timber.w("onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -70,6 +73,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        Timber.w("onRequestPermissionsResult")
         // if no result or no granted permission, do nothing
         if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) return
 
@@ -79,6 +83,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Timber.w("onActivityResult")
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             REQUEST_CHECK_SETTINGS -> locationLiveData.startRequestLocation()
@@ -86,6 +91,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        Timber.w("onMapReady")
         map = googleMap
 
         with(map) {
@@ -117,6 +123,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun refreshPoisFromCurrentLocation() {
+        Timber.w("refreshPoisFromCurrentLocation")
         // Delete all Geofence task
         geofenceManager.removeAllGeofences()
 
@@ -154,11 +161,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     userMarker = addPoiToMapMarker(poi, map)
                 }
                 state.pois?.let { pois ->
+                    var isGeofenceZone = false
                     pois.forEach {
-                        addPoiToMapMarker(it, map)
+                        // Create geofence zone
                         if (it.title == MOUNT_DOOM) {
-                            geofenceManager.createGeofence(it, 12000.0f, GEOFENCE_ID_MORDOR)
+                            isGeofenceZone = true
+                            geofenceManager.createGeofence(it, GEOFENCE_ZONE_RADIUS.toFloat(), GEOFENCE_ID_MORDOR)
                         }
+                        addPoiToMapMarker(it, map, isGeofenceZone)
                     }
                 }
             }
@@ -166,6 +176,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun handleLocationData(locationData: LocationData) {
+        Timber.w("handleLocationData")
         if (handleLocationException(locationData.exception)) return
         locationData.location?.let {
             val latLng = LatLng(it.latitude, it.longitude)
@@ -231,7 +242,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
  * @param map Google map instance
  * @return Marker
  */
-private fun addPoiToMapMarker(poi: Poi, map: GoogleMap) : Marker {
+private fun addPoiToMapMarker(
+    poi: Poi,
+    map: GoogleMap,
+    isGeofenceZone: Boolean = false
+) : Marker {
     val options = MarkerOptions()
         .position(LatLng(poi.latitude, poi.longitude))
         .title(poi.title)
@@ -249,6 +264,16 @@ private fun addPoiToMapMarker(poi: Poi, map: GoogleMap) : Marker {
             else ->BitmapDescriptorFactory.HUE_RED
         }
         options.icon(BitmapDescriptorFactory.defaultMarker(hue))
+    }
+
+    // add circle zone around geofence zones
+    if (isGeofenceZone) {
+        map.addCircle(CircleOptions()
+            .center(options.position)
+            .radius(GEOFENCE_ZONE_RADIUS)
+            .strokeWidth(3f)
+            .strokeColor(Color.RED)
+            .fillColor(Color.argb(70,150, 50, 50)))
     }
 
     val marker = map.addMarker(options)

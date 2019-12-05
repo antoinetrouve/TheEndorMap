@@ -4,8 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.antoinetrouve.theendormap.poi.Poi
-import com.antoinetrouve.theendormap.poi.generatePois
-import com.antoinetrouve.theendormap.poi.generateUserPoi
+import com.antoinetrouve.theendormap.poi.PoiRepository
 import timber.log.Timber
 
 sealed class MapUiState {
@@ -14,7 +13,7 @@ sealed class MapUiState {
     data class PoiReady(val userPoi: Poi? = null, val pois: List<Poi>? = null) : MapUiState()
 }
 
-class MapViewModel : ViewModel() {
+class MapViewModel(private val poiRepository: PoiRepository) : ViewModel() {
     private val uiState by lazy { MutableLiveData<MapUiState>() }
     fun getUiState(): LiveData<MapUiState> = uiState
 
@@ -29,8 +28,8 @@ class MapViewModel : ViewModel() {
 
         uiState.value = MapUiState.Loading
         uiState.value = MapUiState.PoiReady(
-            userPoi = generateUserPoi(latitude, longitude),
-            pois = generatePois(latitude, longitude)
+            userPoi = poiRepository.getUserPoi(latitude, longitude),
+            pois = poiRepository.getPois(latitude, longitude)
         )
     }
 }

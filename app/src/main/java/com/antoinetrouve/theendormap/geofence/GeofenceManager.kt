@@ -10,6 +10,7 @@ import com.google.android.gms.location.LocationServices
 import timber.log.Timber
 
 const val GEOFENCE_ID_MORDOR = "Mordor"
+const val GEOFENCE_ZONE_RADIUS = 12000.0
 
 class GeofenceManager(context: Context) {
     private val appContext = context.applicationContext
