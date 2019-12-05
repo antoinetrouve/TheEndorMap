@@ -9,10 +9,12 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
 import com.antoinetrouve.theendormap.R
 import com.antoinetrouve.theendormap.geofence.GEOFENCE_ID_MORDOR
@@ -21,6 +23,7 @@ import com.antoinetrouve.theendormap.location.LocationData
 import com.antoinetrouve.theendormap.location.LocationLiveData
 import com.antoinetrouve.theendormap.poi.MOUNT_DOOM
 import com.antoinetrouve.theendormap.poi.Poi
+import com.antoinetrouve.theendormap.poi.PoiRepositoryList
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
@@ -37,8 +40,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var geofenceManager: GeofenceManager
     private var firstLocation: Boolean = true
 
-    private val viewModel: MapViewModel by lazy {
-        ViewModelProviders.of(this)[MapViewModel::class.java]
+    private val viewModel by viewModels<MapViewModel> {
+        MapViewModelFactory(PoiRepositoryList())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
